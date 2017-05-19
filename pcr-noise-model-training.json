@@ -1,0 +1,1167 @@
+{
+  "sbg:canvas_x": 74,
+  "sbg:createdOn": 1495219320,
+  "description": "This workflow is for training of PCR stutter and step models that are later used in the main Microsatellite instability pipeline.\n\nInputs files are:\n1. Reads - reads in FASTQ format\n2. Index - reference genome\n\nIf reads are paired end, they should contain metadata field \"Paired end\", which needs to be set to \"1\" and \"2\".\n\nWorkflow should be ran only using the largest male normal sample representing that data submitting center and that sequencing platform, and that models should later be used for all samples that are from same that data submitting center and sequencing platform.",
+  "sbg:canvas_zoom": 0.8499999999999999,
+  "sbg:createdBy": "nikola_tesic",
+  "sbg:sbgMaintained": false,
+  "id": "https://api.sbgenomics.com/v2/apps/nikola_tesic/poster/pcr-noise-model-training/1/raw/",
+  "sbg:latestRevision": 1,
+  "sbg:projectName": "poster",
+  "sbg:project": "nikola_tesic/poster",
+  "outputs": [
+    {
+      "sbg:x": 1095,
+      "sbg:includeInPorts": true,
+      "required": false,
+      "id": "#stutter_model",
+      "sbg:y": 277,
+      "sbg:fileTypes": "STUTTERMODEL",
+      "type": [
+        "null",
+        "File"
+      ],
+      "source": [
+        "#lobSTR_Train_Model_4_0_6.stutter_model"
+      ],
+      "label": "stutter_model"
+    },
+    {
+      "sbg:x": 1099,
+      "sbg:includeInPorts": true,
+      "required": false,
+      "id": "#step_model",
+      "sbg:y": 441,
+      "sbg:fileTypes": "STEPMODEL",
+      "type": [
+        "null",
+        "File"
+      ],
+      "source": [
+        "#lobSTR_Train_Model_4_0_6.step_model"
+      ],
+      "label": "step_model"
+    }
+  ],
+  "sbg:appVersion": [
+    "sbg:draft-2"
+  ],
+  "sbg:revisionsInfo": [
+    {
+      "sbg:revisionNotes": null,
+      "sbg:modifiedBy": "nikola_tesic",
+      "sbg:modifiedOn": 1495219320,
+      "sbg:revision": 0
+    },
+    {
+      "sbg:revisionNotes": null,
+      "sbg:modifiedBy": "nikola_tesic",
+      "sbg:modifiedOn": 1495219479,
+      "sbg:revision": 1
+    }
+  ],
+  "class": "Workflow",
+  "sbg:contributors": [
+    "nikola_tesic"
+  ],
+  "label": "PCR noise model training",
+  "sbg:license": "GNU General Public License v3.0 only",
+  "sbg:validationErrors": [],
+  "sbg:toolkit": "lobSTR",
+  "hints": [
+    {
+      "class": "sbg:AWSInstanceType",
+      "value": "c4.8xlarge.ebs20"
+    }
+  ],
+  "steps": [
+    {
+      "sbg:x": 764,
+      "outputs": [
+        {
+          "id": "#lobSTR_Train_Model_4_0_6.stutter_model"
+        },
+        {
+          "id": "#lobSTR_Train_Model_4_0_6.step_model"
+        }
+      ],
+      "id": "#lobSTR_Train_Model_4_0_6",
+      "sbg:y": 351.4166717529297,
+      "run": {
+        "sbg:cmdPreview": "tar -xf lobSTR_ref.tar && /opt/lobSTR-4.0.6/bin/allelotype --command train --bam /path/to/male_genome.bam --haploid chrX,chrY --index-prefix lobSTR_ref/lobSTR_ --strinfo lobSTR_ref_strinfo.tab  --noweb",
+        "sbg:createdOn": 1470917477,
+        "stdin": "",
+        "sbg:toolAuthor": "Melissa Gymrek, Yaniv Erlich et al., Erlich Lab, New York Genome Center",
+        "hints": [
+          {
+            "class": "sbg:CPURequirement",
+            "value": 1
+          },
+          {
+            "class": "sbg:MemRequirement",
+            "value": 8000
+          },
+          {
+            "class": "DockerRequirement",
+            "dockerPull": "images.sbgenomics.com/marko_kalinic/lobstr:4.0.6",
+            "dockerImageId": ""
+          }
+        ],
+        "sbg:createdBy": "marko_kalinic",
+        "temporaryFailCodes": [],
+        "id": "marko_kalinic/lobstr-4-0-6-demo/lobstr-train-model-4-0-6/0",
+        "sbg:latestRevision": 0,
+        "inputs": [
+          {
+            "inputBinding": {
+              "separate": true,
+              "position": 5,
+              "sbg:cmdInclude": true,
+              "prefix": "--noise_model",
+              "valueFrom": {
+                "script": "{\n  if ($job.inputs.out_prefix) return $job.inputs.out_prefix;\n  else return 'lobSTR_noise_model';\n}",
+                "class": "Expression",
+                "engine": "#cwl-js-engine"
+              }
+            },
+            "sbg:category": "Input and output options",
+            "sbg:toolDefaultValue": "lobSTR_noise_model",
+            "description": "Prefix for output file names.",
+            "id": "#out_prefix",
+            "type": [
+              "null",
+              "string"
+            ],
+            "label": "Prefix for output files"
+          },
+          {
+            "sbg:stageInput": "link",
+            "sbg:category": "Input and output options",
+            "description": "lobSTR index bundle for the respective reference genome.",
+            "required": true,
+            "id": "#index",
+            "sbg:fileTypes": "TAR",
+            "type": [
+              "File"
+            ],
+            "label": "lobSTR index bundle"
+          },
+          {
+            "inputBinding": {
+              "separate": true,
+              "sbg:cmdInclude": true,
+              "prefix": "--haploid",
+              "position": 2
+            },
+            "sbg:category": "Training options",
+            "description": "Comma-separated list of chromosomes that should be forced to have homozygous calls. Specify 'all' if the organism is haploid.",
+            "id": "#haploid",
+            "type": [
+              "string"
+            ],
+            "label": "Chromosomes for homozygous calls"
+          },
+          {
+            "sbg:stageInput": null,
+            "inputBinding": {
+              "itemSeparator": ",",
+              "secondaryFiles": [
+                ".bai"
+              ],
+              "prefix": "--bam",
+              "separate": true,
+              "sbg:cmdInclude": true,
+              "position": 1
+            },
+            "sbg:category": "Input and output options",
+            "description": "Reads, typically from a high coverage male sample, aligned to the reference genome.",
+            "required": true,
+            "id": "#bams",
+            "sbg:fileTypes": "BAM",
+            "type": [
+              {
+                "items": "File",
+                "type": "array",
+                "name": "bams"
+              }
+            ],
+            "label": "BAM alignment file(s)"
+          }
+        ],
+        "sbg:project": "marko_kalinic/lobstr-4-0-6-demo",
+        "outputs": [
+          {
+            "outputBinding": {
+              "glob": "*.stuttermodel"
+            },
+            "description": "Trained model stuttermodel file.",
+            "id": "#stutter_model",
+            "sbg:fileTypes": "STUTTERMODEL",
+            "type": [
+              "null",
+              "File"
+            ],
+            "label": "Stutter model"
+          },
+          {
+            "outputBinding": {
+              "glob": "*.stepmodel"
+            },
+            "description": "Trained model stepmodel file.",
+            "id": "#step_model",
+            "sbg:fileTypes": "STEPMODEL",
+            "type": [
+              "null",
+              "File"
+            ],
+            "label": "Step model"
+          }
+        ],
+        "arguments": [
+          {
+            "separate": true,
+            "position": 3,
+            "prefix": "--index-prefix",
+            "valueFrom": {
+              "script": "{\n  var index_path = $job.inputs.index.path.split('/');\n  var file_name = index_path[index_path.length - 1];\n  var dir_name = file_name.substring(0, file_name.length - 4);\n  return dir_name + '/lobSTR_';\n}",
+              "class": "Expression",
+              "engine": "#cwl-js-engine"
+            }
+          },
+          {
+            "separate": true,
+            "position": 4,
+            "prefix": "--strinfo",
+            "valueFrom": {
+              "script": "{\n  var index_path = $job.inputs.index.path.split('/');\n  var file_name = index_path[index_path.length - 1];\n  var base_name = file_name.split('.');\n  return base_name.slice(0, base_name.length - 1).join('.') + '_strinfo.tab';\n}",
+              "class": "Expression",
+              "engine": "#cwl-js-engine"
+            }
+          },
+          {
+            "separate": true,
+            "position": 100,
+            "prefix": "",
+            "valueFrom": "--noweb"
+          }
+        ],
+        "sbg:revisionsInfo": [
+          {
+            "sbg:revisionNotes": "Copy of marko_kalinic/lobstr-4-0-5-dev/lobstr-train-model-4-0-6/4",
+            "sbg:modifiedBy": "marko_kalinic",
+            "sbg:modifiedOn": 1470917477,
+            "sbg:revision": 0
+          }
+        ],
+        "sbg:sbgMaintained": false,
+        "class": "CommandLineTool",
+        "sbg:copyOf": "marko_kalinic/lobstr-4-0-5-dev/lobstr-train-model-4-0-6/4",
+        "label": "lobSTR Train Model 4.0.6",
+        "sbg:license": "GNU General Public License v3.0 only",
+        "sbg:validationErrors": [],
+        "sbg:links": [
+          {
+            "id": "http://lobstr.teamerlich.org/index.html",
+            "label": "Homepage"
+          },
+          {
+            "id": "https://github.com/mgymrek/lobstr-code",
+            "label": "Source Code"
+          },
+          {
+            "id": "https://github.com/mgymrek/lobstr-code/releases/download/v4.0.6/lobSTR-4.0.6.tar.gz",
+            "label": "Download"
+          },
+          {
+            "id": "http://genome.cshlp.org/content/early/2012/04/19/gr.135780.111.abstract",
+            "label": "Publication"
+          }
+        ],
+        "sbg:modifiedOn": 1470917477,
+        "description": "lobSTR is a toolkit for profiling Short Tandem Repeats (STRs) from high throughput sequencing data.\n\nlobSTR Train Model can be used to train a custom noise model, which specifies the probability of observing PCR stutter at a given locus based on sequence properties (motif length, total STR length, GC content, and STR purity) and the expected step size distribution. The model needs to be trained using data from haploid chromosomes as for these, there should be a single allele present and reads supporting an allele other than the modal one are likely due to stutter noise. Essentially, model training requires a deep coverage human male genome, or a genome with haploid chromosomes if a different species is concerned.\n\nTraining a model requires that the reads are aligned to the reference genome, and that the resulting BAM file is sorted and indexed. The lobSTR reference index bundle must also be provided. This tool will produce two files representing the trained noise model, which can be used in subsequent runs of lobSTR Allelotype tool.\n\n**Important:** In the current version of lobSTR (4.0.6), training of custom noise models can only be carried out using alignment files produced by lobSTR. Supplying BAM files produced by external aligners will result in failed tasks.",
+        "stdout": "",
+        "sbg:toolkit": "lobSTR",
+        "sbg:toolkitVersion": "4.0.6",
+        "sbg:revisionNotes": "Copy of marko_kalinic/lobstr-4-0-5-dev/lobstr-train-model-4-0-6/4",
+        "sbg:categories": [
+          "Other"
+        ],
+        "sbg:revision": 0,
+        "sbg:id": "marko_kalinic/lobstr-4-0-6-demo/lobstr-train-model-4-0-6/0",
+        "sbg:contributors": [
+          "marko_kalinic"
+        ],
+        "requirements": [
+          {
+            "requirements": [
+              {
+                "class": "DockerRequirement",
+                "dockerPull": "rabix/js-engine"
+              }
+            ],
+            "id": "#cwl-js-engine",
+            "class": "ExpressionEngineRequirement"
+          }
+        ],
+        "x": 764,
+        "y": 351.4166717529297,
+        "cwlVersion": "sbg:draft-2",
+        "sbg:image_url": null,
+        "sbg:job": {
+          "allocatedResources": {
+            "mem": 8000,
+            "cpu": 1
+          },
+          "inputs": {
+            "out_prefix": "pcr_noise_model",
+            "haploid": "chrX,chrY",
+            "index": {
+              "path": "/path/to/lobSTR_ref.tar",
+              "size": 0,
+              "secondaryFiles": [],
+              "class": "File"
+            },
+            "bams": [
+              {
+                "path": "/path/to/male_genome.bam",
+                "size": 0,
+                "secondaryFiles": [],
+                "class": "File"
+              }
+            ]
+          }
+        },
+        "sbg:modifiedBy": "marko_kalinic",
+        "successCodes": [],
+        "baseCommand": [
+          {
+            "script": "{\n  var file_name = $job.inputs.index.path.split('/').pop();\n  return 'tar -xf ' + file_name;\n}",
+            "class": "Expression",
+            "engine": "#cwl-js-engine"
+          },
+          "&&",
+          "/opt/lobSTR-4.0.6/bin/allelotype",
+          "--command",
+          "train"
+        ]
+      },
+      "inputs": [
+        {
+          "id": "#lobSTR_Train_Model_4_0_6.out_prefix"
+        },
+        {
+          "id": "#lobSTR_Train_Model_4_0_6.index",
+          "source": [
+            "#index"
+          ]
+        },
+        {
+          "default": "chrX,chrY",
+          "id": "#lobSTR_Train_Model_4_0_6.haploid"
+        },
+        {
+          "id": "#lobSTR_Train_Model_4_0_6.bams",
+          "source": [
+            "#lobSTR_Aligner_4_0_6.sorted_bam"
+          ]
+        }
+      ]
+    },
+    {
+      "sbg:x": 343,
+      "outputs": [
+        {
+          "id": "#lobSTR_Aligner_4_0_6.sorted_bam"
+        },
+        {
+          "id": "#lobSTR_Aligner_4_0_6.bam"
+        },
+        {
+          "id": "#lobSTR_Aligner_4_0_6.alignment_stats"
+        }
+      ],
+      "id": "#lobSTR_Aligner_4_0_6",
+      "sbg:y": 328.41668701171875,
+      "run": {
+        "sbg:cmdPreview": "tar -xf index.tar && /opt/lobSTR-4.0.6/bin/lobSTR   --p1 /opt/lobSTR-4.0.6/tests/test_sample_1.fastq.gz --p2 /opt/lobSTR-4.0.6/tests/test_sample_2.fastq.gz --gzip --out test_sample  --oldillumina --index-prefix index/lobSTR_  --fastq --threads 8  --noweb  && bamfile=*.aligned.bam; sortedbase=`basename $bamfile .aligned.bam`.sorted && samtools sort $bamfile $sortedbase && samtools index \"$sortedbase\".bam",
+        "sbg:createdOn": 1467638243,
+        "stdin": "",
+        "sbg:toolAuthor": "Melissa Gymrek, Yaniv Erlich et al., Erlich Lab, New York Genome Center",
+        "hints": [
+          {
+            "class": "sbg:CPURequirement",
+            "value": 8
+          },
+          {
+            "class": "sbg:MemRequirement",
+            "value": 15000
+          },
+          {
+            "class": "DockerRequirement",
+            "dockerPull": "images.sbgenomics.com/marko_kalinic/lobstr:4.0.6",
+            "dockerImageId": ""
+          }
+        ],
+        "sbg:createdBy": "marko_kalinic",
+        "temporaryFailCodes": [],
+        "id": "marko_kalinic/lobstr-4-0-6-demo/lobstr-aligner-4-0-6/0",
+        "sbg:latestRevision": 0,
+        "inputs": [
+          {
+            "inputBinding": {
+              "separate": true,
+              "position": 2,
+              "sbg:cmdInclude": true,
+              "prefix": "--rg-sample",
+              "valueFrom": {
+                "script": "{\n  var rg_sample = $job.inputs.rg_sample;\n  if (!rg_sample) {\n    var input_files = [].concat($job.inputs.reads);\n    var input_metadata = input_files[0].metadata;\n    if (input_metadata != null &&\n        input_metadata.sample_id != null &&\n        input_metadata.sample_id != '-') {\n        rg_sample = input_metadata.sample_id;\n      }\n    else {rg_sample = 'sample1';}\n  }\n  \n  return rg_sample;\n}",
+                "class": "Expression",
+                "engine": "#cwl-js-engine"
+              }
+            },
+            "sbg:category": "Input and output options",
+            "description": "Read group sample tag. This needs to be set either in the input file(s) metadata, or listed here, in order for multi-sample downstream analysis to function properly.",
+            "id": "#rg_sample",
+            "type": [
+              "null",
+              "string"
+            ],
+            "label": "Read group sample tag"
+          },
+          {
+            "inputBinding": {
+              "separate": true,
+              "position": 3,
+              "sbg:cmdInclude": true,
+              "prefix": "--rg-lib",
+              "valueFrom": {
+                "script": "{\n  var rg_lib = $job.inputs.rg_lib;\n  if (!rg_lib) {\n    var input_files = [].concat($job.inputs.reads);\n    var input_metadata = input_files[0].metadata;\n    if (input_metadata != null &&\n        input_metadata.library_id != null &&\n        input_metadata.library_id != '-') {\n        rg_lib = input_metadata.library_id;\n      }\n    else {rg_lib = 'library1';}\n  }\n  \n  return rg_lib;\n}",
+                "class": "Expression",
+                "engine": "#cwl-js-engine"
+              }
+            },
+            "sbg:category": "Input and output options",
+            "description": "Read group library tag. This needs to be set either in the input file(s) metadata, or listed here, in order for multi-sample downstream analysis to function properly.",
+            "id": "#rg_lib",
+            "type": [
+              "null",
+              "string"
+            ],
+            "label": "Read group library tag"
+          },
+          {
+            "inputBinding": {
+              "separate": true,
+              "sbg:cmdInclude": true,
+              "prefix": "-u",
+              "position": 15
+            },
+            "sbg:category": "Alignment options",
+            "sbg:toolDefaultValue": "False",
+            "description": "Require length difference to be a multiple of the repeat unit.",
+            "id": "#require_multiplets",
+            "type": [
+              "null",
+              "boolean"
+            ],
+            "label": "Difference must be a multiple of the repeat unit"
+          },
+          {
+            "sbg:category": "Input and output options",
+            "description": "One or more files containing sequence reads for alignment. These can be in FASTA, FASTQ, and BAM format. If supplying paired-end reads in FASTQ format, the metadata fields must be set to 1/2, accordingly. If reads are in BAM format, this file must be sorted by read names.",
+            "required": true,
+            "id": "#reads",
+            "sbg:fileTypes": "FASTQ, FASTQ.GZ, FQ, FQ.GZ, BAM",
+            "type": [
+              {
+                "items": "File",
+                "type": "array",
+                "name": "reads"
+              }
+            ],
+            "label": "Input reads"
+          },
+          {
+            "type": [
+              "null",
+              "string"
+            ],
+            "sbg:category": "Input and output options",
+            "id": "#out_prefix",
+            "description": "Prefix for output file names.",
+            "label": "Prefix for output files"
+          },
+          {
+            "inputBinding": {
+              "separate": true,
+              "sbg:cmdInclude": true,
+              "prefix": "--multi",
+              "position": 5
+            },
+            "sbg:category": "Input and output options",
+            "sbg:toolDefaultValue": "False",
+            "description": "Report reads mapping to multiple genomic locations. Alternate alignments given in XA tag.",
+            "id": "#multi_mapping",
+            "type": [
+              "null",
+              "boolean"
+            ],
+            "label": "Report reads mapping to multiple genomic locations"
+          },
+          {
+            "inputBinding": {
+              "separate": true,
+              "sbg:cmdInclude": true,
+              "prefix": "--min-read-length",
+              "position": 6
+            },
+            "sbg:category": "Informative read detection options",
+            "sbg:toolDefaultValue": "45",
+            "description": "Minimum number of nucleotides for a read to be processed.",
+            "id": "#min_read_length",
+            "type": [
+              "null",
+              "int"
+            ],
+            "label": "Minimum number of nucleotides for a read to be processed"
+          },
+          {
+            "sbg:stageInput": null,
+            "inputBinding": {
+              "separate": true,
+              "sbg:cmdInclude": true,
+              "prefix": "--min-flank-allow-mismatch",
+              "position": 21
+            },
+            "sbg:category": "Alignment options",
+            "sbg:toolDefaultValue": "30",
+            "description": "Mininum length of flanking region to allow mismatches.",
+            "id": "#min_flank_allow_mismatch",
+            "type": [
+              "null",
+              "int"
+            ],
+            "label": "Mininum length of flanking region to allow mismatches"
+          },
+          {
+            "inputBinding": {
+              "separate": true,
+              "sbg:cmdInclude": true,
+              "prefix": "--minflank",
+              "position": 11
+            },
+            "sbg:category": "Informative read detection options",
+            "sbg:toolDefaultValue": "8",
+            "description": "Minimum length of flanking region to try to align.",
+            "id": "#min_flank",
+            "type": [
+              "null",
+              "int"
+            ],
+            "label": "Minimum length of flanking region"
+          },
+          {
+            "inputBinding": {
+              "separate": true,
+              "sbg:cmdInclude": true,
+              "prefix": "--max-read-length",
+              "position": 7
+            },
+            "sbg:category": "Informative read detection options",
+            "sbg:toolDefaultValue": "1024",
+            "description": "Maximum number of nucleotides for a read to be processed.",
+            "id": "#max_read_length",
+            "type": [
+              "null",
+              "int"
+            ],
+            "label": "Maximum number of nucleotides for a read to be processed"
+          },
+          {
+            "inputBinding": {
+              "separate": true,
+              "sbg:cmdInclude": true,
+              "prefix": "-m",
+              "position": 16
+            },
+            "sbg:category": "Alignment options",
+            "sbg:toolDefaultValue": "1",
+            "description": "Edit distance in either flanking region allowed during alignment.",
+            "id": "#max_mismatch",
+            "type": [
+              "null",
+              "int"
+            ],
+            "label": "Allowed edit distance in either flanking region"
+          },
+          {
+            "inputBinding": {
+              "separate": true,
+              "sbg:cmdInclude": true,
+              "prefix": "--mapq",
+              "position": 14
+            },
+            "sbg:category": "Alignment options",
+            "sbg:toolDefaultValue": "100",
+            "description": "Maximum allowed MAPQ score calculated as the sum of qualities at base mismatches.",
+            "id": "#max_mapq",
+            "type": [
+              "null",
+              "int"
+            ],
+            "label": "Maximum mismatched MAPQ score"
+          },
+          {
+            "inputBinding": {
+              "separate": true,
+              "sbg:cmdInclude": true,
+              "prefix": "--max-hits-quit-aln",
+              "position": 20
+            },
+            "sbg:category": "Alignment options",
+            "sbg:toolDefaultValue": "1000",
+            "description": "Stop alignment search after this many hits found. Use -1 for no limit.",
+            "id": "#max_hits_quit_aln",
+            "type": [
+              "null",
+              "int"
+            ],
+            "label": "Number of hits to stop alignment search"
+          },
+          {
+            "sbg:stageInput": null,
+            "inputBinding": {
+              "separate": true,
+              "sbg:cmdInclude": true,
+              "prefix": "-g",
+              "position": 17
+            },
+            "sbg:category": "Alignment options",
+            "sbg:toolDefaultValue": "1",
+            "description": "Maximum number of gap opens allowed in each flanking region.",
+            "id": "#max_gap_opens",
+            "type": [
+              "null",
+              "int"
+            ],
+            "label": "Maximum number of gap opens"
+          },
+          {
+            "inputBinding": {
+              "separate": true,
+              "sbg:cmdInclude": true,
+              "prefix": "-e",
+              "position": 18
+            },
+            "sbg:category": "Alignment options",
+            "sbg:toolDefaultValue": "1",
+            "description": "Maximum number of gap extensions allowed in each flanking region.",
+            "id": "#max_gap_extensions",
+            "type": [
+              "null",
+              "int"
+            ],
+            "label": "Maximum number of gap extensions"
+          },
+          {
+            "sbg:stageInput": null,
+            "inputBinding": {
+              "separate": true,
+              "sbg:cmdInclude": true,
+              "prefix": "-r",
+              "position": 19
+            },
+            "sbg:category": "Alignment options",
+            "sbg:toolDefaultValue": "-1",
+            "description": "Maximum allowed fraction of misalignments. Ignored if allowed edit distance is set.",
+            "id": "#max_frac_misaln",
+            "type": [
+              "null",
+              "float"
+            ],
+            "label": "Maximum fraction of misalignments"
+          },
+          {
+            "inputBinding": {
+              "separate": true,
+              "sbg:cmdInclude": true,
+              "prefix": "--maxflank",
+              "position": 12
+            },
+            "sbg:category": "Informative read detection options",
+            "sbg:toolDefaultValue": "100",
+            "description": "Length to trim the ends of flanking regions to, if they exceed that length.",
+            "id": "#max_flank",
+            "type": [
+              "null",
+              "int"
+            ],
+            "label": "Maximum length of flanking region"
+          },
+          {
+            "sbg:stageInput": null,
+            "inputBinding": {
+              "separate": true,
+              "sbg:cmdInclude": true,
+              "prefix": "--max-diff-ref",
+              "position": 13
+            },
+            "sbg:category": "Alignment options",
+            "sbg:toolDefaultValue": "50",
+            "description": "Maximum difference in length from the reference sequence to report.",
+            "id": "#max_diff_ref",
+            "type": [
+              "null",
+              "int"
+            ],
+            "label": "Maximum difference in length"
+          },
+          {
+            "sbg:stageInput": "copy",
+            "sbg:category": "Input and output options",
+            "description": "lobSTR index bundle for the respective reference genome.",
+            "required": true,
+            "id": "#index",
+            "sbg:fileTypes": "TAR",
+            "type": [
+              "File"
+            ],
+            "label": "lobSTR index bundle"
+          },
+          {
+            "inputBinding": {
+              "separate": true,
+              "sbg:cmdInclude": true,
+              "prefix": "--fft-window-step",
+              "position": 9
+            },
+            "sbg:category": "Informative read detection options",
+            "sbg:toolDefaultValue": "4",
+            "description": "Step size of sliding window used in the initial, \"sensing\" step of the alignment algorithm.",
+            "id": "#fft_window_step",
+            "type": [
+              "null",
+              "int"
+            ],
+            "label": "Step size of sliding window"
+          },
+          {
+            "inputBinding": {
+              "separate": true,
+              "sbg:cmdInclude": true,
+              "prefix": "--fft-window-size",
+              "position": 8
+            },
+            "sbg:category": "Informative read detection options",
+            "sbg:toolDefaultValue": "16",
+            "description": "Length of the sequence used in the inital, \"sensing\" step of the alignment algorithm.",
+            "id": "#fft_window_size",
+            "type": [
+              "null",
+              "int"
+            ],
+            "label": "FFT window size"
+          },
+          {
+            "inputBinding": {
+              "separate": true,
+              "sbg:cmdInclude": true,
+              "prefix": "--entropy-threshold",
+              "position": 10
+            },
+            "sbg:category": "Informative read detection options",
+            "sbg:toolDefaultValue": "0.45",
+            "description": "Entropy threshold score to call a window periodic.",
+            "id": "#entropy_threshold",
+            "type": [
+              "null",
+              "float"
+            ],
+            "label": "Entropy threshold"
+          },
+          {
+            "inputBinding": {
+              "separate": true,
+              "sbg:cmdInclude": true,
+              "prefix": "--bwaq",
+              "position": 4
+            },
+            "sbg:category": "Input and output options",
+            "sbg:toolDefaultValue": "10",
+            "description": "Parameter for read trimming. BWA trims a read down to argmax_x{\\sum_{i=x+1}^l(INT-q_i)} if q_l<INT where l is the original read length.",
+            "id": "#bwaq",
+            "type": [
+              "null",
+              "int"
+            ],
+            "label": "Parameter for read trimming"
+          }
+        ],
+        "sbg:project": "marko_kalinic/lobstr-4-0-6-demo",
+        "outputs": [
+          {
+            "outputBinding": {
+              "sbg:inheritMetadataFrom": "#reads",
+              "glob": "*.sorted.bam",
+              "secondaryFiles": [
+                ".bai"
+              ]
+            },
+            "description": "Sorted and indexed BAM alignment file with informative reads.",
+            "id": "#sorted_bam",
+            "sbg:fileTypes": "BAM",
+            "type": [
+              "null",
+              "File"
+            ],
+            "label": "Sorted BAM alignment file"
+          },
+          {
+            "outputBinding": {
+              "sbg:inheritMetadataFrom": "#reads",
+              "glob": "*.aligned.bam"
+            },
+            "description": "BAM file with reads aligning to short tandem repeats (STRs). Note this BAM output is not sorted.",
+            "id": "#bam",
+            "sbg:fileTypes": "BAM",
+            "type": [
+              "null",
+              "File"
+            ],
+            "label": "BAM alignment file"
+          },
+          {
+            "outputBinding": {
+              "glob": "*.stats"
+            },
+            "description": "Plain text report containing alignment run statistics.",
+            "id": "#alignment_stats",
+            "sbg:fileTypes": "STATS",
+            "type": [
+              "null",
+              "File"
+            ],
+            "label": "Alignment statistics"
+          }
+        ],
+        "arguments": [
+          {
+            "separate": true,
+            "valueFrom": "--noweb",
+            "position": 100
+          },
+          {
+            "separate": true,
+            "position": 99,
+            "prefix": "--threads",
+            "valueFrom": {
+              "script": "{ return $job.allocatedResources.cpu }",
+              "class": "Expression",
+              "engine": "#cwl-js-engine"
+            }
+          },
+          {
+            "separate": true,
+            "valueFrom": {
+              "script": "{\n  var read_files = [].concat($job.inputs.reads);\n  \n  // Check if input are single-end or paired-end reads\n  // and join them with the corresponding flag\n  var parsed_arg = '';\n  \n  if (read_files.length == 1) {\n    parsed_arg = '-f ' + read_files[0].path;\n  }\n    \n  else {\n    var reads_pe1 = [];\n    var reads_pe2 = [];\n    var reads_se = [];\n    \n    for (i = 0; i < read_files.length; i++) {\n      var read_metadata = read_files[i].metadata;\n      if (!read_metadata) read_metadata = {};\n      \n      \n      // BAM files are always passed with -f\n      if (read_metadata.file_extension) {\n        if (read_metadata.file_extension.toLowerCase() == 'bam') {\n          reads_se.push(read_files[i].path);\n          continue;\n        }\n      }\n      \n      if (!read_metadata.paired_end) read_metadata = {paired_end:'-'};\n      switch (read_metadata.paired_end) {\n        case '1':\n          reads_pe1.push(read_files[i].path);\n          break;\n        case '2':\n          reads_pe2.push(read_files[i].path);\n          break;\n        default:\n          reads_se.push(read_files[i].path);\n      }\n    }\n    \n    if (reads_se.length != 0) {\n      parsed_arg = '-f ' + reads_se.join(',');\n    }\n    if (reads_pe1.length != 0) {\n      reads_pe1.sort();\n      parsed_arg = parsed_arg + ' --p1 ' + reads_pe1.join(',');\n    }\n    if (reads_pe2.length != 0) {\n      reads_pe2.sort();\n      parsed_arg = parsed_arg + ' --p2 ' + reads_pe2.join(',');\n    }\n  }\n  \n  // Check if the input files are gzipped\n  // N.B. We're assuming that if one is -- all are; lobSTR won't have it any other way.\n  var file_name = read_files[0].path.split('.');\n  if (file_name[file_name.length - 1] == 'gz') parsed_arg = parsed_arg + ' --gzip';\n  \n  return parsed_arg;\n\n}\n    ",
+              "class": "Expression",
+              "engine": "#cwl-js-engine"
+            },
+            "position": 1
+          },
+          {
+            "separate": true,
+            "position": 2,
+            "prefix": "--out",
+            "valueFrom": {
+              "script": "{\n  var output_prefix = '';\n  \n  if ($job.inputs.out_prefix) output_prefix = $job.inputs.out_prefix;\n  \n  else {\n    var read_files = [].concat($job.inputs.reads);\n    var file_name = read_files[0].path.split('/').pop();\n    var name_segments = file_name.split('.');\n    if (name_segments.pop() == 'gz') {\n      output_prefix = name_segments.slice(0, name_segments.length - 1).join('.');\n    }\n    else { output_prefix = name_segments.join('.'); }\n    \n    if (output_prefix.search(/[_,-,.][0-9]/) == output_prefix.length - 2) {\n      output_prefix = output_prefix.slice(0,-2);\n    }\n  }\n  \n  return output_prefix;\n}",
+              "class": "Expression",
+              "engine": "#cwl-js-engine"
+            }
+          },
+          {
+            "separate": true,
+            "valueFrom": {
+              "script": "{\n  // Check the quality scale associated with the provided FASTQ input files\n  // adding the appropriate flag to the command line, if needed.\n  \n  var q_scale_flag = '';\n  \n  var read_files = [].concat($job.inputs.reads);\n  var metadata = read_files[0].metadata;\n  \n  if (metadata != null) {\n    var q_scale = metadata.quality_scale;\n    if (q_scale != null) {\n      switch (q_scale) {\n        case 'illumina13':\n        case 'illumina15':\n          q_scale_flag = '--oldillumina';\n          break;\n      }\n    }\n  }\n  \n  return q_scale_flag;\n  \n}",
+              "class": "Expression",
+              "engine": "#cwl-js-engine"
+            },
+            "position": 3
+          },
+          {
+            "separate": true,
+            "position": 4,
+            "prefix": "--index-prefix",
+            "valueFrom": {
+              "script": "{\n  var index_path = $job.inputs.index.path.split('/');\n  var file_name = index_path[index_path.length - 1];\n  var dir_name = file_name.substring(0, file_name.length - 4);\n  return dir_name + '/lobSTR_';\n}",
+              "class": "Expression",
+              "engine": "#cwl-js-engine"
+            }
+          },
+          {
+            "separate": true,
+            "valueFrom": "&& bamfile=*.aligned.bam; sortedbase=`basename $bamfile .aligned.bam`.sorted && samtools sort $bamfile $sortedbase && samtools index \"$sortedbase\".bam",
+            "position": 200
+          },
+          {
+            "separate": true,
+            "valueFrom": {
+              "script": "{\n  var inputs = [].concat($job.inputs.reads);\n  var file_name = inputs[0].path.split('/').pop();\n  file_name = file_name.split('.');\n  var file_ext = file_name.pop();\n  if (file_ext == 'gz') {\n    file_ext = file_name.pop();\n  }\n  var cmd_line = '';\n  if (file_ext.toLowerCase() == 'bam') {\n    cmd_line = \"$bamflag\";\n  }\n  else if (file_ext.toLowerCase() == 'fastq' || file_ext.toLowerCase() == 'fq') {\n    cmd_line = '--fastq';\n  }\n  \n  return cmd_line;\n}",
+              "class": "Expression",
+              "engine": "#cwl-js-engine"
+            },
+            "position": 98
+          }
+        ],
+        "sbg:revisionsInfo": [
+          {
+            "sbg:revisionNotes": "Copy of marko_kalinic/lobstr-4-0-5-dev/lobstr-aligner-4-0-5/22",
+            "sbg:modifiedBy": "marko_kalinic",
+            "sbg:modifiedOn": 1467638243,
+            "sbg:revision": 0
+          }
+        ],
+        "sbg:sbgMaintained": false,
+        "class": "CommandLineTool",
+        "sbg:copyOf": "marko_kalinic/lobstr-4-0-5-dev/lobstr-aligner-4-0-5/22",
+        "label": "lobSTR Aligner 4.0.6",
+        "sbg:license": "GNU General Public License v3.0 only",
+        "sbg:validationErrors": [],
+        "sbg:links": [
+          {
+            "id": "http://lobstr.teamerlich.org/index.html",
+            "label": "Homepage"
+          },
+          {
+            "id": "https://github.com/mgymrek/lobstr-code",
+            "label": "Source Code"
+          },
+          {
+            "id": "https://github.com/mgymrek/lobstr-code/releases/download/v4.0.6/lobSTR-4.0.6.tar.gz",
+            "label": "Download"
+          },
+          {
+            "id": "http://genome.cshlp.org/content/early/2012/04/19/gr.135780.111.abstract",
+            "label": "Publication"
+          }
+        ],
+        "sbg:modifiedOn": 1467638243,
+        "description": "lobSTR is a toolkit for profiling Short Tandem Repeats (STRs) from high throughput sequencing data.\n\nlobSTR Aligner (named only lobSTR in the original distribution) is a specialized read aligner, based on a two-step rapid algorithm: first, a set of \"informative reads\" are identified, that fully encompass STR loci, considering STR motifs of periods 1 through 6. Next, alignment is performed only with the identified informative reads, by separately anchoring flanking regions up- and downstream from the repetitive region, thus eliminating the need for gapped alignment. Since only a fraction of the total read count actually gets to be aligned, lobSTR typically features very short execution times. It should be noted that lobSTR will work best with 100+ bp read lengths.\n\nlobSTR Aligner takes single-end or paired-end reads in FASTA/FASTQ/BAM format on input (including gzipped FASTA/FASTQ files), and produces BAM alignment files. The alignment is performed using a custom lobSTR reference and index files, with pre-built versions based on hg19 and GRCh37 available. The BAM ouput is also automatically sorted and indexed (using samtools), thus producing output suitable for downstream variant calling using lobSTR Allelotype tool.\n\n#### Common issues\n\n##### Correctly specifying input file metadata\nIn order for the input files to be correctly passed to lobSTR for alignment, it is important that the following metadata fields are filled:\n   1. Paired-end -- If providing paired-end reads in two FASTQ files as input, it is essential that this metadata field is set to values of 1 and 2, respectively. Otherwise, if these fields are left with the default value (\u2018-\u2019), they will be treated as single-end reads.   \n   2. Quality scale -- lobSTR performs read trimming and performs evaluation of base mismatches by using Phred quality scores. For this to work correctly, the quality scale (e.g. Sanger, Illumina 1.3, Illumina 1.5, or Illumina 1.8) needs to be specified in the FASTQ file metadata. If the input file contains Solexa quality scores, conversion to Phred scores can be performed using SBG FASTQ Quality Converter tool. Inference of the quality scale and metadata updating can be automated using SBG FASTQ Quality Detector.   \n\n##### Sorting input BAM files\nIn order to supply reads in BAM format for alignment, the BAM file first needs to be sorted by read names. This can easily be done using a tool like Samtools sort. If an unsorted BAM file is supplied, the task will appear to run normally, but will usually fail after a couple of hours with an error message related to the instance running the task, or an error like \u201cFailed to execute status command for lobstr-aligner-4-0-6\u201d.",
+        "stdout": "",
+        "sbg:toolkit": "lobSTR",
+        "sbg:toolkitVersion": "4.0.6",
+        "sbg:revisionNotes": "Copy of marko_kalinic/lobstr-4-0-5-dev/lobstr-aligner-4-0-5/22",
+        "sbg:categories": [
+          "Alignment"
+        ],
+        "sbg:revision": 0,
+        "sbg:id": "marko_kalinic/lobstr-4-0-6-demo/lobstr-aligner-4-0-6/0",
+        "sbg:contributors": [
+          "marko_kalinic"
+        ],
+        "requirements": [
+          {
+            "requirements": [
+              {
+                "class": "DockerRequirement",
+                "dockerPull": "rabix/js-engine"
+              }
+            ],
+            "id": "#cwl-js-engine",
+            "class": "ExpressionEngineRequirement"
+          }
+        ],
+        "x": 343,
+        "y": 328.41668701171875,
+        "cwlVersion": "sbg:draft-2",
+        "sbg:image_url": null,
+        "sbg:job": {
+          "allocatedResources": {
+            "mem": 15000,
+            "cpu": 8
+          },
+          "inputs": {
+            "max_gap_opens": null,
+            "max_mapq": null,
+            "min_read_length": null,
+            "max_read_length": null,
+            "fft_window_step": null,
+            "max_frac_misaln": null,
+            "rg_sample": "",
+            "reads": [
+              {
+                "path": "/opt/lobSTR-4.0.6/tests/test_sample_1.fastq.gz",
+                "size": 0,
+                "secondaryFiles": [],
+                "class": "File",
+                "metadata": {
+                  "paired_end": "1",
+                  "sample_id": "test_sample_1",
+                  "library_id": "test_lib",
+                  "quality_scale": "illumina15"
+                }
+              },
+              {
+                "path": "/opt/lobSTR-4.0.6/tests/test_sample_2.fastq.gz",
+                "secondaryFiles": [],
+                "metadata": {
+                  "paired_end": "2",
+                  "sample_id": "test_sample_1",
+                  "library_id": "test_lib",
+                  "quality_scale": "illumina15"
+                }
+              }
+            ],
+            "rg_lib": "",
+            "max_flank": null,
+            "entropy_threshold": null,
+            "max_diff_ref": null,
+            "bwaq": null,
+            "max_hits_quit_aln": null,
+            "min_flank": null,
+            "out_prefix": "",
+            "multi_mapping": false,
+            "max_gap_extensions": null,
+            "require_multiplets": false,
+            "fft_window_size": null,
+            "index": {
+              "path": "/path/to/index.tar",
+              "size": 0,
+              "secondaryFiles": [],
+              "class": "File"
+            },
+            "min_flank_allow_mismatch": null,
+            "max_mismatch": null
+          }
+        },
+        "sbg:modifiedBy": "marko_kalinic",
+        "successCodes": [],
+        "baseCommand": [
+          {
+            "script": "{\n  var inputs = [].concat($job.inputs.reads);\n  var file_name = inputs[0].path.split('/').pop();\n  file_name = file_name.split('.');\n  var file_ext = file_name.pop();\n  if (file_ext == 'gz') {\n    file_ext = file_name.pop();\n  }\n  var cmd_line = '';\n  if (file_ext.toLowerCase() == 'bam') {\n    cmd_line = \"bamflag='' && count=`samtools view -c -f 0x1 \";\n    cmd_line = cmd_line + inputs[0].path + '`';\n    cmd_line = cmd_line + \" && if [ $count != 0 ]; then bamflag='--bampair'; else bamflag='--bam'; fi;\"\n  }\n  return cmd_line;\n}",
+            "class": "Expression",
+            "engine": "#cwl-js-engine"
+          },
+          {
+            "script": "{\n  var index_path = $job.inputs.index.path.split('/');\n  var file_name = index_path[index_path.length - 1];\n  return 'tar -xf ' + file_name;\n}",
+            "class": "Expression",
+            "engine": "#cwl-js-engine"
+          },
+          "&&",
+          "/opt/lobSTR-4.0.6/bin/lobSTR"
+        ]
+      },
+      "inputs": [
+        {
+          "id": "#lobSTR_Aligner_4_0_6.rg_sample"
+        },
+        {
+          "id": "#lobSTR_Aligner_4_0_6.rg_lib"
+        },
+        {
+          "id": "#lobSTR_Aligner_4_0_6.require_multiplets"
+        },
+        {
+          "id": "#lobSTR_Aligner_4_0_6.reads",
+          "source": [
+            "#reads"
+          ]
+        },
+        {
+          "id": "#lobSTR_Aligner_4_0_6.out_prefix"
+        },
+        {
+          "id": "#lobSTR_Aligner_4_0_6.multi_mapping"
+        },
+        {
+          "id": "#lobSTR_Aligner_4_0_6.min_read_length"
+        },
+        {
+          "id": "#lobSTR_Aligner_4_0_6.min_flank_allow_mismatch"
+        },
+        {
+          "id": "#lobSTR_Aligner_4_0_6.min_flank"
+        },
+        {
+          "id": "#lobSTR_Aligner_4_0_6.max_read_length"
+        },
+        {
+          "id": "#lobSTR_Aligner_4_0_6.max_mismatch"
+        },
+        {
+          "id": "#lobSTR_Aligner_4_0_6.max_mapq"
+        },
+        {
+          "id": "#lobSTR_Aligner_4_0_6.max_hits_quit_aln"
+        },
+        {
+          "id": "#lobSTR_Aligner_4_0_6.max_gap_opens"
+        },
+        {
+          "id": "#lobSTR_Aligner_4_0_6.max_gap_extensions"
+        },
+        {
+          "id": "#lobSTR_Aligner_4_0_6.max_frac_misaln"
+        },
+        {
+          "id": "#lobSTR_Aligner_4_0_6.max_flank"
+        },
+        {
+          "id": "#lobSTR_Aligner_4_0_6.max_diff_ref"
+        },
+        {
+          "id": "#lobSTR_Aligner_4_0_6.index",
+          "source": [
+            "#index"
+          ]
+        },
+        {
+          "id": "#lobSTR_Aligner_4_0_6.fft_window_step"
+        },
+        {
+          "id": "#lobSTR_Aligner_4_0_6.fft_window_size"
+        },
+        {
+          "id": "#lobSTR_Aligner_4_0_6.entropy_threshold"
+        },
+        {
+          "id": "#lobSTR_Aligner_4_0_6.bwaq"
+        }
+      ]
+    }
+  ],
+  "sbg:id": "nikola_tesic/poster/pcr-noise-model-training/1",
+  "sbg:modifiedOn": 1495219479,
+  "requirements": [],
+  "sbg:canvas_y": -167,
+  "cwlVersion": "sbg:draft-2",
+  "sbg:image_url": "https://brood.sbgenomics.com/static/nikola_tesic/poster/pcr-noise-model-training/1.png",
+  "sbg:revision": 1,
+  "sbg:modifiedBy": "nikola_tesic",
+  "inputs": [
+    {
+      "sbg:x": 78,
+      "id": "#index",
+      "sbg:y": 486,
+      "sbg:fileTypes": "TAR",
+      "type": [
+        "File"
+      ],
+      "label": "index"
+    },
+    {
+      "sbg:x": 86,
+      "id": "#reads",
+      "sbg:y": 255,
+      "sbg:fileTypes": "FASTQ, FASTQ.GZ, FQ, FQ.GZ, BAM",
+      "type": [
+        {
+          "items": "File",
+          "type": "array",
+          "name": "reads"
+        }
+      ],
+      "label": "reads"
+    }
+  ]
+}
